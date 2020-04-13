@@ -9,12 +9,13 @@ const todoController = (() => ({
 
     /**
      *@name create
+     *@description creates a new todo
      *@param {Object} request
      *@param {Object} response
-     *@returns {Object} Functions
+     *@returns {Null} null
      */
 
-    create: (request, response) => {
+    create(request, response) {
         const newTodo = new Todo({
             text: request.body.text
         })
@@ -26,6 +27,32 @@ const todoController = (() => ({
                 console.log(err)
             })
     },
+
+
+
+    /**
+     *
+     * @name get
+     * @description fetches all todos for a user
+     * @param {*} request
+     * @param {*} response
+     */
+    get(request, response) {
+        Todo.find()
+            .then(result => {
+                response.send({
+                    status: 'ok',
+                    data: result
+                })
+            }).catch(err => {
+                response.status(400).send(err)
+                console.log(err)
+            })
+    }
+
+
+
+
 }))()
 
 module.exports = todoController

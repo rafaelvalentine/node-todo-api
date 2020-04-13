@@ -21,7 +21,7 @@ app.use(bodyParser.json())
 app.use(morgan('combined'))
 app.use(helmet())
 app.get('/', (req, res) => res.send('Hello World!'))
-app.use('/', BaseRoute)
+app.use('/api/v1', BaseRoute)
 app.listen(port, () => {
     connectToDB()
     console.log(`Example app listening on port port!`)
