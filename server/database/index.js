@@ -4,7 +4,7 @@ const { User } = require('./models/user')
 
 mongoose.Promise = global.Promise
 
-const db_url = 'mongodb://localhost:27017/TodoApp';
+const db_url = process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp';
 
 const db = mongoose.connection
 
