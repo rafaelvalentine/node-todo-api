@@ -1,11 +1,17 @@
 const request = require('supertest')
 const expect = require('expect')
+const { ObjectID } = require('mongodb')
 
 const { app } = require('../index')
 const { Todo } = require('../database')
-const testTodos = [
-    { text: 'todod 1' },
-    { text: 'todo 2' }
+const testTodos = [{
+        _id: new ObjectID(),
+        text: 'todod 1'
+    },
+    {
+        _id: new ObjectID(),
+        text: 'todo 2'
+    }
 ]
 beforeEach(done => {
     Todo.remove({})
@@ -56,8 +62,6 @@ describe('POST /api/v1/todo', () => {
     })
 })
 
-
-
 describe('GET /api/v1/todo', () => {
     it('should get all todos', done => {
         request(app)
@@ -66,6 +70,30 @@ describe('GET /api/v1/todo', () => {
             .expect(res => {
                 expect(res.body.data.length).toBe(2)
             })
+            .end(done)
+    })
+})
+
+describe('GET /api/v1/todo:id', () => {
+    it('should return todo doc', done => {
+        request(app)
+            .get(`/api/v1/todo/${testTodos[0]._id.toHexString()}`)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.data.text).toBe(testTodos[0].text)
+            })
+            .end(done)
+    })
+    it('should return 404 if todo not found', done => {
+        request(app)
+            .get(`/api/v1/todo/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done)
+    })
+    it('should return 400 for non-objectId', done => {
+        request(app)
+            .get(`/api/v1/todo/${123}`)
+            .expect(400)
             .end(done)
     })
 })
