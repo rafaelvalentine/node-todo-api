@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const { ObjectID } = require('mongodb')
 
 const { Todo } = require('../database')
@@ -95,6 +96,57 @@ const todoController = (() => ({
             console.log(e)
         }
     },
+
+    /**
+     *
+     * @name patch
+     * @description update single todo to completed for a user
+     * @param {*} request
+     * @param {*} response
+     */
+    async patch(request, response) {
+        const id = request.params.id
+        const body = _.pick(request.body, ['text', 'completed'])
+
+        if (!ObjectID.isValid(id)) {
+            console.log('Not a Valid ID')
+            return response.status(400).send({
+                message: 'Not a Valid ID',
+                status: 'Bad Request',
+                statusCode: 400
+            })
+        }
+        if (body.completed && (_.isBoolean(body.completed) || body.completed.toLowerCase() === 'true')) {
+            body.completedAt = new Date().getTime()
+        } else {
+            body.completed = false
+            body.completedAt = null
+        }
+        try {
+            const todo = await Todo.findByIdAndUpdate(id, body, { new: true })
+            if (!todo) {
+                response.status(404).send({
+                    message: 'Couldn\'t find ID',
+                    status: 'Not Found',
+                    statusCode: 404
+                })
+                return console.log('Couldn\'t find ID')
+            }
+            response.status(200).send({
+                data: todo,
+                message: `Updated Todo: ${id}`,
+                status: 'OK',
+                statusCode: 200
+            })
+        } catch (e) {
+            response.status(500).send({
+                message: 'Something went wrong',
+                status: 'Internal Server Error',
+                statusCode: 500
+            })
+            console.log(e)
+        }
+    },
     /**
      *
      * @name delete
@@ -140,6 +192,7 @@ const todoController = (() => ({
             console.log(e)
         }
     }
+
 
 }))()
 

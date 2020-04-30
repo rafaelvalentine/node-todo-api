@@ -10,6 +10,7 @@ BaseRoute
     .get('/todo', todoController.get)
     .post('/todo', todoController.create)
     .get('/todo/:id', todoController.fetch)
+    .patch('/todo/:id', todoController.patch)
     .delete('/todo/:id', todoController.delete)
 
 
