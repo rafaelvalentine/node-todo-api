@@ -17,7 +17,8 @@ db.once('open', () => {
 const connectToDB = () =>
     mongoose.connect(db_url, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        useFindAndModify: false
     })
 
 module.exports = { connectToDB, Todo, User }
