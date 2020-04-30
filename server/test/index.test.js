@@ -99,7 +99,6 @@ describe('GET /api/v1/todo:id', () => {
 })
 
 describe('DELETE /api/v1/todo:id', () => {
-
     it('Should remove a Todo', done => {
         const hexId = testTodos[1]._id.toHexString()
         request(app)
@@ -130,6 +129,41 @@ describe('DELETE /api/v1/todo:id', () => {
         request(app)
             .delete(`/api/v1/todo/${123}`)
             .expect(400)
+            .end(done)
+    })
+})
+
+describe('PATCH /api/v1/todo:id', () => {
+    it('Should update Todo', done => {
+        const hexId = testTodos[0]._id.toHexString()
+        const text = 'test update a todo'
+        const completed = true
+        request(app)
+            .patch(`/api/v1/todo/${hexId}`)
+            .send({...testTodos[0], text, completed })
+            .expect(200)
+            .expect(res => {
+                const body = res.body.data
+                expect(body.text).toBe(text)
+                expect(body.completed).toBe(true)
+                expect(body.completedAt).toBeA('number')
+            })
+            .end(done)
+    })
+    it('Should clear completedAt when todo not completed', done => {
+        const hexId = testTodos[1]._id.toHexString()
+        const text = 'test update a todo'
+        const completed = false
+        request(app)
+            .patch(`/api/v1/todo/${hexId}`)
+            .send({...testTodos[1], text, completed })
+            .expect(200)
+            .expect(res => {
+                const body = res.body.data
+                expect(body.text).toBe(text)
+                expect(body.completed).toBe(false)
+                expect(body.completedAt).toNotExist()
+            })
             .end(done)
     })
 })
