@@ -17,7 +17,8 @@ const connectToDB = () =>
     mongoose.connect(db_url, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        useFindAndModify: false
+        useFindAndModify: false,
+        useCreateIndex: true
     })
 
 module.exports = { connectToDB, Todo, User }

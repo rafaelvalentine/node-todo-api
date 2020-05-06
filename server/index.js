@@ -10,8 +10,6 @@ const helmet = require('helmet')
 const { connectToDB } = require('./database')
 const BaseRoute = require('./routes')
 
-
-
 const app = express()
 
 const port = process.env.PORT
@@ -25,10 +23,8 @@ app.use(helmet())
 app.get('/', (req, res) => res.send('Hello World!'))
 app.use('/api/v1', BaseRoute)
 app.listen(port, () => {
-
     connectToDB()
-
-    console.log(`Example app listening on port port!`)
+    console.log(`App listening on port ${port}!`)
 })
 
 module.exports = { app }
