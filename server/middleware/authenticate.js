@@ -1,10 +1,21 @@
 const { ObjectID } = require('mongodb')
+const validator = require('validator')
+const _ = require('lodash')
 
 const { User } = require('../database')
 
 const authenticate = (request, response, next) => {
     const id = request.params.id
-    const token = request.header('x-auth') || null
+    let bearerToken = request.headers.authorization || (request.header('x-auth') || null)
+    const bearer = 'Bearer'
+    let token
+
+    if (validator.contains(bearerToken, bearer)) {
+        const [_bearer, _token] = _.split(bearerToken, ' ')
+        token = _token
+    } else {
+        token = bearerToken
+    }
     if (!ObjectID.isValid(id)) {
         response.status(400).send({
             message: 'Authentication failed',
