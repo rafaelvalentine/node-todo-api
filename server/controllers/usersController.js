@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const validator = require('validator')
 const { ObjectID } = require('mongodb')
 
 const { User } = require('../database')
@@ -50,11 +51,29 @@ const usersController = (() => ({
      */
 
     user(request, response) {
-        response.status(200).send({
-            data: request.user,
-            message: `Found User: ${request.user.email}`,
-            status: 'OK',
-            statusCode: 200
+        const id = request.params.id
+        if (!ObjectID.isValid(id)) {
+            response.status(400).send({
+                message: 'Authentication failed',
+                status: 'Bad Request',
+                statusCode: 400
+            })
+            return
+        }
+        if (validator.equals(request.user._id.toString(), id)) {
+            response.status(200).send({
+                data: request.user,
+                message: `Found User: ${request.user.email}`,
+                status: 'OK',
+                statusCode: 200
+            })
+            return
+        }
+        response.status(401).send({
+            message: 'Invalid Credentials',
+            status: 'Unauthorized',
+            statusCode: 401,
+            error: 'Not Authenticated, bad userId or token'
         })
     }
 

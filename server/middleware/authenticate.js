@@ -1,11 +1,10 @@
-const { ObjectID } = require('mongodb')
 const validator = require('validator')
 const _ = require('lodash')
 
 const { User } = require('../database')
 
 const authenticate = (request, response, next) => {
-    const id = request.params.id
+
     let bearerToken = request.headers.authorization || (request.header('x-auth') || null)
     const bearer = 'Bearer'
     let token
@@ -16,15 +15,8 @@ const authenticate = (request, response, next) => {
     } else {
         token = bearerToken
     }
-    if (!ObjectID.isValid(id)) {
-        response.status(400).send({
-            message: 'Authentication failed',
-            status: 'Bad Request',
-            statusCode: 400
-        })
-        return
-    }
-    User.findByToken(token, id)
+
+    User.findByToken(token)
         .then(user => {
             request.user = user
             request.token = token

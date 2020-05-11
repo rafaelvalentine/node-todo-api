@@ -57,21 +57,18 @@ userSchema.methods.generateAuthToken = function() {
         .then(() => token)
 }
 
-userSchema.statics.findByToken = function(token, id) {
+userSchema.statics.findByToken = function(token) {
     const User = this
     let decoded
     try {
         decoded = jwt.verify(token, 'abc123')
-        if (!validator.equals(decoded._id, id)) {
-            throw Error
-        }
     } catch (error) {
         return new Promise((resolve, reject) => {
             reject('Not Authenticated, bad userId or token')
         })
     }
     return User.findOne({
-        _id: id,
+        _id: decoded._id,
         'tokens.token': token,
         'tokens.access': 'auth'
     })

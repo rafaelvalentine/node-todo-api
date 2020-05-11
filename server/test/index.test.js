@@ -3,23 +3,14 @@ const expect = require('expect')
 const { ObjectID } = require('mongodb')
 
 const { app } = require('../index')
+const { populateTodos, testTodos, populateUsers, testUsers } = require('./seed')
 const { Todo } = require('../database')
-const testTodos = [{
-        _id: new ObjectID(),
-        text: 'todod 1'
-    },
-    {
-        _id: new ObjectID(),
-        text: 'todo 2'
-    }
-]
+
 beforeEach(done => {
-    Todo.remove({})
-        // .then(() => done())
-        .then(() => {
-            Todo.insertMany(testTodos)
-                .then(() => done())
-        })
+    populateUsers(done)
+})
+beforeEach(done => {
+    populateTodos(done)
 })
 describe('POST /api/v1/todo', () => {
     it('should create a new Todo', done => {
@@ -166,4 +157,25 @@ describe('PATCH /api/v1/todo:id', () => {
             })
             .end(done)
     })
+})
+
+describe('Get /api/v1/user/info/:id', () => {
+    it('it should return user if authenticated', done => {
+            request(app)
+                .get(`/api/v1/user/info/${testUsers[0]._id.toHexString()}`)
+                .set('Authorization', `Bearer ${testUsers[0].tokens[0].token}`)
+                .set('x-auth', testUsers[0].tokens[0].token)
+                .expect(200)
+                .expect(res => {
+                    expect(res.body.data._id).toBe(testUsers[0]._id.toHexString())
+                    expect(res.body.data.email).toBe(testUsers[0].email)
+                })
+                .end(done)
+        })
+        // it('it should return 401 if user not authenticated', done => {
+
+    // })
+    // it('it should return 400 if userid is not sent', done => {
+
+    // })
 })
