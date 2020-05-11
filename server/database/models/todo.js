@@ -5,7 +5,7 @@ const schema = {
     text: {
         type: String,
         required: true,
-        minLenght: 1,
+        minlength: 1,
         trim: true
     },
     completed: {

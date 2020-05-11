@@ -5,7 +5,7 @@ const { User } = require('../database')
 
 const authenticate = (request, response, next) => {
 
-    let bearerToken = request.headers.authorization || (request.header('x-auth') || null)
+    let bearerToken = request.headers.authorization || (request.header('x-auth') || '')
     const bearer = 'Bearer'
     let token
 

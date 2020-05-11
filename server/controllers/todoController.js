@@ -24,10 +24,23 @@ const todoController = (() => ({
         })
         newTodo.save()
             .then(result => {
-                response.send(result)
+                response.status(200).send({
+                    status: 'ok',
+                    data: result
+                })
             }).catch(err => {
-                response.status(400).send(err)
-                console.log(err)
+                if (err.errors && err.errors.text) {
+                    response.status(400).send({
+                        message: 'Invalid Todo',
+                        status: 'Bad Request',
+                        statusCode: 400,
+                        // error: err
+                        error: err.errors.text.message
+                    })
+                    return
+                }
+
+                console.log('error from todoController: ', err)
             })
     },
 
@@ -192,7 +205,6 @@ const todoController = (() => ({
             console.log(e)
         }
     }
-
 
 }))()
 

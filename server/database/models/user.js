@@ -8,7 +8,7 @@ const schema = {
     email: {
         type: String,
         required: true,
-        minLenght: 1,
+        minlength: 1,
         trim: true,
         unique: true,
         validate: {
@@ -19,7 +19,7 @@ const schema = {
     password: {
         type: String,
         required: true,
-        minLenght: 8
+        minlength: 8
     },
     tokens: [{
         access: {
@@ -58,6 +58,7 @@ userSchema.methods.generateAuthToken = function() {
 }
 
 userSchema.statics.findByToken = function(token) {
+
     const User = this
     let decoded
     try {

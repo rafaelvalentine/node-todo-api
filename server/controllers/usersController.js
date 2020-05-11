@@ -32,13 +32,43 @@ const usersController = (() => ({
                     statusCode: 200
                 })
             }).catch(err => {
-                response.status(500).send({
-                    message: 'Something went wrong',
-                    status: 'Internal Server Error',
-                    statusCode: 500,
-                    error: err.errmsg || err.errors.password.message
-                })
-                console.log('error from conroller: ', err)
+                if (err.errors && err.errors.email) {
+                    response.status(400).send({
+                            message: 'Invalid Credentials',
+                            status: 'Bad Request',
+                            statusCode: 400,
+                            // error: err
+                            error: err.errors.email.message
+                        })
+                        // return
+                } else if (err.errors && err.errors.password) {
+                    response.status(400).send({
+                            message: 'Invalid Credentials',
+                            status: 'Bad Request',
+                            statusCode: 400,
+                            // error: err
+                            error: err.errors.password.message
+                        })
+                        // return
+                } else if (err && err.errmsg) {
+                    response.status(400).send({
+                        message: 'Invalid Credentials',
+                        status: 'Bad Request',
+                        statusCode: 400,
+                        // error: err
+                        error: err.errmsg
+                    })
+                } else {
+                    response.status(500).send({
+                        message: 'Something went wrong',
+                        status: 'Internl server error',
+                        statusCode: 500,
+                        // error: err
+                        error: err
+                    })
+                }
+
+
             })
     },
 

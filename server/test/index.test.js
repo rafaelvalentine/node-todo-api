@@ -4,7 +4,7 @@ const { ObjectID } = require('mongodb')
 
 const { app } = require('../index')
 const { populateTodos, testTodos, populateUsers, testUsers } = require('./seed')
-const { Todo } = require('../database')
+const { Todo, User } = require('../database')
 
 beforeEach(done => {
     populateUsers(done)
@@ -20,10 +20,10 @@ describe('POST /api/v1/todo', () => {
             .send({ text })
             .expect(200)
             .expect(res => {
-                expect(res.body.text).toBe(text)
+                expect(res.body.data.text).toBe(text)
             })
             .end((err, res) => {
-                let text = res.body.text
+                let text = res.body.data.text
                 if (err) return done(err)
                 Todo.findOne({ text })
                     .then((result) => {
@@ -161,21 +161,116 @@ describe('PATCH /api/v1/todo:id', () => {
 
 describe('Get /api/v1/user/info/:id', () => {
     it('it should return user if authenticated', done => {
-            request(app)
-                .get(`/api/v1/user/info/${testUsers[0]._id.toHexString()}`)
-                .set('Authorization', `Bearer ${testUsers[0].tokens[0].token}`)
-                .set('x-auth', testUsers[0].tokens[0].token)
-                .expect(200)
-                .expect(res => {
-                    expect(res.body.data._id).toBe(testUsers[0]._id.toHexString())
-                    expect(res.body.data.email).toBe(testUsers[0].email)
-                })
-                .end(done)
-        })
-        // it('it should return 401 if user not authenticated', done => {
+        request(app)
+            .get(`/api/v1/user/info/${testUsers[0]._id.toHexString()}`)
+            .set('Authorization', `Bearer ${testUsers[0].tokens[0].token}`)
+            .set('x-auth', testUsers[0].tokens[0].token)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.data._id).toBe(testUsers[0]._id.toHexString())
+                expect(res.body.data.email).toBe(testUsers[0].email)
+            })
+            .end(done)
+    })
+    it('it should return 401 if user not authenticated', done => {
+        request(app)
+            .get(`/api/v1/user/info/${testUsers[0]._id.toHexString()}`)
+            .expect(401)
+            .expect(res => {
+                expect(res.body.data).toNotExist()
+            })
+            .end(done)
+    })
+    it('it should return 400 if userId is not valid', done => {
+        request(app)
+            .get(`/api/v1/user/info/${testUsers[0]._id.toHexString()}1`)
+            .set('Authorization', `Bearer ${testUsers[0].tokens[0].token}`)
+            .set('x-auth', testUsers[0].tokens[0].token)
+            .expect(400)
+            .expect(res => {
+                expect(res.body.data).toNotExist({})
+            })
+            .end(done)
+    })
 
-    // })
-    // it('it should return 400 if userid is not sent', done => {
+    it('it should return 404 if userId is not sent', done => {
+        request(app)
+            .get(`/api/v1/user/info/`)
+            .set('Authorization', `Bearer ${testUsers[0].tokens[0].token}`)
+            .set('x-auth', testUsers[0].tokens[0].token)
+            .expect(404)
+            .expect(res => {
+                expect(res.body).toEqual({})
+            })
+            .end(done)
+    })
+})
 
-    // })
+describe('POST /api/v1/user/register', () => {
+    it('Should create user', done => {
+        const email = 'tester@tester.com'
+        const password = 'passwordtest'
+        request(app)
+            .post(`/api/v1/user/register`)
+            .send({
+                email,
+                password
+            })
+            .expect(200)
+            .expect(res => {
+                expect(res.headers['x-auth']).toExist()
+                expect(res.body.data._id).toExist()
+                expect(res.body.data.email).toBe(email)
+            })
+            .end(err => {
+                if (err) return done(err)
+                User.findOne({ email })
+                    .then(result => {
+                        expect(result).toExist()
+                        expect(result.password).toNotEqual(password)
+                        done()
+                    }).catch(err => {
+                        done(err)
+                    })
+            })
+    })
+    it('Should return validation error if email Invalid', done => {
+        request(app)
+            .post(`/api/v1/user/register`)
+            .send({
+                email: 'valentine',
+                password: 'password1'
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.body.data).toNotExist()
+            })
+            .end(done)
+    })
+    it('Should return validation error if password length Invalid', done => {
+        request(app)
+            .post(`/api/v1/user/register`)
+            .send({
+                email: 'valentine@teating.com',
+                password: 'pass'
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.body.data).toNotExist()
+            })
+            .end(done)
+    })
+    it('Should not create User if email in use', done => {
+        request(app)
+            .post(`/api/v1/user/register`)
+            .send({
+                email: testUsers[0].email,
+                password: 'password1'
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.body.data).toNotExist()
+            })
+            .end(done)
+    })
 })
