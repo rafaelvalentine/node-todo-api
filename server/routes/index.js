@@ -15,5 +15,6 @@ BaseRoute
     .delete('/todo/:id', todoController.delete)
     .post('/user/register', usersController.create)
     .get('/user/info/:id', authenticate, usersController.user)
+    .post('/user/login', usersController.login)
 
 module.exports = BaseRoute

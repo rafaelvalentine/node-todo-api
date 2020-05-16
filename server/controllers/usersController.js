@@ -67,8 +67,6 @@ const usersController = (() => ({
                         error: err
                     })
                 }
-
-
             })
     },
 
@@ -92,7 +90,7 @@ const usersController = (() => ({
         }
         if (validator.equals(request.user._id.toString(), id)) {
             response.status(200).send({
-                data: request.user,
+                data: _.pick(request.user, ['_id', 'email', 'password', 'createdAt']),
                 message: `Found User: ${request.user.email}`,
                 status: 'OK',
                 statusCode: 200
@@ -105,6 +103,58 @@ const usersController = (() => ({
             statusCode: 401,
             error: 'Not Authenticated, bad userId or token'
         })
+    },
+
+    /**
+     *@name login
+     *@description login a user
+     *@param {Object} request
+     *@param {Object} response
+     *@returns {Null} null
+     */
+
+    login(request, response) {
+        const userInfo = _.pick(request.body, ['email', 'password'])
+
+        User.findByCredentials(userInfo)
+            .then(user => user.generateAuthToken()
+                .then(token => {
+                    response.header('x-auth', token).status(200).send({
+                        data: user,
+                        message: `Found User: ${user.email}`,
+                        status: 'OK',
+                        statusCode: 200
+                    })
+                })
+            )
+            .catch(err => {
+                response.status(401).send({
+                    message: 'Invalid Credentials',
+                    status: 'Unauthorized',
+                    statusCode: 401,
+                    error: 'Not Authenticated, bad userId or token'
+                })
+            })
+
+        // const id = request.params.id
+        // if (!ObjectID.isValid(id)) {
+        //     response.status(400).send({
+        //         message: 'Authentication failed',
+        //         status: 'Bad Request',
+        //         statusCode: 400
+        //     })
+        //     return
+        // }
+        // if (validator.equals(request.user._id.toString(), id)) {
+
+        // return
+        // }
+        // response.status(401).send({
+        //     message: 'Invalid Credentials',
+        //     status: 'Unauthorized',
+        //     statusCode: 401,
+        //     error: 'Not Authenticated, bad userId or token'
+        // })
     }
 
 }))()
