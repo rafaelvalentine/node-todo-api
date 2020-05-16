@@ -135,26 +135,29 @@ const usersController = (() => ({
                     error: 'Not Authenticated, bad userId or token'
                 })
             })
+    },
+    /**
+     *@name logout
+     *@description logout a user 
+     *@param {Object} request
+     *@param {Object} response
+     *@returns {Null} null
+     */
 
-        // const id = request.params.id
-        // if (!ObjectID.isValid(id)) {
-        //     response.status(400).send({
-        //         message: 'Authentication failed',
-        //         status: 'Bad Request',
-        //         statusCode: 400
-        //     })
-        //     return
-        // }
-        // if (validator.equals(request.user._id.toString(), id)) {
+    logout(request, response) {
+        const user = request.user
+        const token = request.token
 
-        // return
-        // }
-        // response.status(401).send({
-        //     message: 'Invalid Credentials',
-        //     status: 'Unauthorized',
-        //     statusCode: 401,
-        //     error: 'Not Authenticated, bad userId or token'
-        // })
+        user.deleteToken(token)
+            .then(user => {
+                response.status(200).send({
+                    message: `Logged User: ${user.email}`,
+                    status: 'OK',
+                    statusCode: 200
+                })
+            }, () => {
+                response.status(400).send()
+            })
     }
 
 }))()

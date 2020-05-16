@@ -57,6 +57,13 @@ userSchema.methods.generateAuthToken = function() {
         .then(() => token)
 }
 
+userSchema.methods.deleteToken = function(token) {
+    const user = this
+    const tokens = user.tokens
+    user.tokens = _.filter(tokens, tokenObj => tokenObj.token !== token)
+    return user.save()
+}
+
 userSchema.statics.findByToken = function(token) {
     const User = this
     let decoded
