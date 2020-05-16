@@ -274,3 +274,55 @@ describe('POST /api/v1/user/register', () => {
             .end(done)
     })
 })
+
+describe('POST /api/v1/user/login', () => {
+    it('Should login a user and return auth token', done => {
+        request(app)
+            .post('/api/v1/user/login')
+            .send({...testUsers[1] })
+            .expect(200)
+            .expect(res => {
+                expect(res.headers['x-auth']).toExist()
+                expect(res.body.data._id).toExist()
+                expect(res.body.data.email).toBe(testUsers[1].email)
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err)
+                }
+                User.findById(testUsers[1]._id)
+                    .then(user => {
+                        expect(user).toExist()
+                        expect(user.tokens[0]).toInclude({
+                            access: 'auth',
+                            token: res.headers['x-auth']
+                        })
+                        done()
+                    }).catch(err => {
+                        done(err)
+                    })
+            })
+    })
+    it('Should reject invalid login', done => {
+        request(app)
+            .post('/api/v1/user/login')
+            .send({ email: testUsers[1].email, password: 'password' })
+            .expect(401)
+            .expect(res => {
+                expect(res.body.data).toNotExist()
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err)
+                }
+                User.findById(testUsers[1]._id)
+                    .then(user => {
+                        expect(user).toExist()
+                        expect(user.tokens.length).toBe(0)
+                        done()
+                    }).catch(err => {
+                        done(err)
+                    })
+            })
+    })
+})
