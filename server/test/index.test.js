@@ -326,3 +326,32 @@ describe('POST /api/v1/user/login', () => {
             })
     })
 })
+
+describe('DELETE /api/v1/user/logout', () => {
+    it('Should remove auth token on logout', done => {
+        request(app)
+            .delete('/api/v1/user/logout')
+            .set('Authorization', `Bearer ${testUsers[0].tokens[0].token}`)
+            .set('x-auth', testUsers[0].tokens[0].token)
+            .expect(200)
+            .expect(res => {
+                expect(res.body.data).toNotExist()
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err)
+                }
+                User.findById(testUsers[0]._id)
+                    .then(user => {
+                        expect(user).toExist()
+                        expect(user.tokens).toExclude({
+                            access: 'auth',
+                            token: res.headers['x-auth']
+                        })
+                        done()
+                    }).catch(err => {
+                        done(err)
+                    })
+            })
+    })
+})
