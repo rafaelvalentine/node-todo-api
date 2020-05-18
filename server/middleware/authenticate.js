@@ -12,12 +12,18 @@ const authenticate = (request, response, next) => {
     if (validator.contains(bearerToken, bearer)) {
         const [_bearer, _token] = _.split(bearerToken, ' ')
         token = _token
+
     } else {
         token = bearerToken
+
     }
 
     User.findByToken(token)
         .then(user => {
+            if (!user) {
+                return Promise.reject('Unauthorized!!!')
+
+            }
             request.user = user
             request.token = token
             next()

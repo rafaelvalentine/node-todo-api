@@ -151,7 +151,7 @@ const usersController = (() => ({
         user.deleteToken(token)
             .then(user => {
                 response.status(200).send({
-                    message: `Logged User: ${user.email}`,
+                    message: `Logged out User: ${user.email}`,
                     status: 'OK',
                     statusCode: 200
                 })

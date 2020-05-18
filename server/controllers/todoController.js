@@ -53,6 +53,7 @@ const todoController = (() => ({
      * @param {*} response
      */
     get(request, response) {
+        console.log(request.user)
         Todo.find({ _creator: request.user._id })
             .then(result => {
                 response.send({
