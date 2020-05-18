@@ -2,18 +2,20 @@ const { ObjectID } = require('mongodb')
 const jwt = require('jsonwebtoken')
 
 const { Todo, User } = require('../../database')
-
+const userOneId = new ObjectID()
+const userTwoId = new ObjectID()
 const testTodos = [{
         _id: new ObjectID(),
-        text: 'todod 1'
+        text: 'todod 1',
+        _creator: userOneId
     },
     {
         _id: new ObjectID(),
-        text: 'todo 2'
+        text: 'todo 2',
+        _creator: userTwoId
     }
 ]
-const userOneId = new ObjectID()
-const userTwoId = new ObjectID()
+
 const testUsers = [{
     _id: userOneId,
     email: 'valentine@testone.com',
@@ -25,7 +27,11 @@ const testUsers = [{
 }, {
     _id: userTwoId,
     email: 'valentine@testtwo.com',
-    password: 'password2'
+    password: 'password2',
+    tokens: [{
+        access: 'auth',
+        token: jwt.sign({ _id: userTwoId, access: 'auth' }, 'abc123')
+    }]
 }]
 const populateTodos = done => {
     Todo.remove({})

@@ -31,7 +31,7 @@ const schema = {
             require: true
         }
     }],
-    createddAt: {
+    createdAt: {
         type: Date,
         default: new Date().toISOString()
     }
@@ -45,7 +45,7 @@ userSchema.methods.toJSON = function() {
     const userObject = user.toObject()
     const authToken = _.findIndex(userObject.tokens, { 'access': 'auth' })
     const token = userObject.tokens[authToken].token
-    return {..._.pick(userObject, ['_id', 'email', 'create', 'createddAt']), token }
+    return {..._.pick(userObject, ['_id', 'email', 'create', 'createdAt']), token }
 }
 userSchema.methods.generateAuthToken = function() {
     const user = this

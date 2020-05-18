@@ -16,9 +16,13 @@ const schema = {
         type: Number,
         default: null
     },
-    createddAt: {
+    createdAt: {
         type: Date,
         default: new Date().toISOString()
+    },
+    _creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
     }
 
 }

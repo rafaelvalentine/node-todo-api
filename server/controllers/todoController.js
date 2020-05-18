@@ -20,7 +20,8 @@ const todoController = (() => ({
 
     create(request, response) {
         const newTodo = new Todo({
-            text: request.body.text
+            text: request.body.text,
+            _creator: request.user._id
         })
         newTodo.save()
             .then(result => {
@@ -52,7 +53,7 @@ const todoController = (() => ({
      * @param {*} response
      */
     get(request, response) {
-        Todo.find()
+        Todo.find({ _creator: request.user._id })
             .then(result => {
                 response.send({
                     status: 'ok',
@@ -73,9 +74,9 @@ const todoController = (() => ({
      */
 
     async fetch(request, response) {
-        const id = request.params.id
+        const _id = request.params.id
 
-        if (!ObjectID.isValid(id)) {
+        if (!ObjectID.isValid(_id)) {
             console.log('Not a Valid ID')
             return response.status(400).send({
                 message: 'Not a Valid ID',
@@ -85,7 +86,10 @@ const todoController = (() => ({
         }
 
         try {
-            const todo = await Todo.findById(id)
+            const todo = await Todo.findOne({
+                _id,
+                _creator: request.user._id
+            })
             if (!todo) {
                 response.status(404).send({
                     message: 'Couldn\'t find ID',
@@ -96,7 +100,7 @@ const todoController = (() => ({
             }
             response.status(200).send({
                 data: todo,
-                message: `Found Todo: ${id}`,
+                message: `Found Todo: ${_id}`,
                 status: 'OK',
                 statusCode: 200
             })
@@ -136,7 +140,11 @@ const todoController = (() => ({
             body.completedAt = null
         }
         try {
-            const todo = await Todo.findByIdAndUpdate(id, body, { new: true })
+            const todo = await Todo.findOneAndUpdate({
+                    _id: id,
+                    _creator: request.user._id
+                },
+                body, { new: true })
             if (!todo) {
                 response.status(404).send({
                     message: 'Couldn\'t find ID',
@@ -181,7 +189,10 @@ const todoController = (() => ({
         }
 
         try {
-            const todo = await Todo.findByIdAndRemove(id)
+            const todo = await Todo.findOneAndRemove({
+                _id: id,
+                _creator: request.user._id
+            })
             if (!todo) {
                 response.status(404).send({
                     message: 'Couldn\'t find ID',
