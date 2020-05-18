@@ -50,7 +50,7 @@ userSchema.methods.toJSON = function() {
 userSchema.methods.generateAuthToken = function() {
     const user = this
     const access = 'auth'
-    const token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123')
+    const token = jwt.sign({ _id: user._id.toHexString(), access }, process.env.JWT_SECRET)
     user.tokens = user.tokens.concat([{ access, token }])
         // user.tokens = [...user.tokens, { access, token }]
     return user.save()
@@ -68,7 +68,7 @@ userSchema.statics.findByToken = function(token) {
     const User = this
     let decoded
     try {
-        decoded = jwt.verify(token, 'abc123')
+        decoded = jwt.verify(token, process.env.JWT_SECRET)
     } catch (error) {
         return new Promise((resolve, reject) => {
             reject('Not Authenticated, bad userId or token')
