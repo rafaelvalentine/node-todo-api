@@ -21,7 +21,7 @@ const authenticate = (request, response, next) => {
     User.findByToken(token)
         .then(user => {
             if (!user) {
-                return Promise.reject('Unauthorized!!!')
+                return Promise.reject('Token failure!')
 
             }
             request.user = user
