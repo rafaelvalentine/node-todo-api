@@ -123,7 +123,7 @@ describe('DELETE /api/v1/todo:id', () => {
                 if (err) return done(err)
                 Todo.findById(hexId)
                     .then((result) => {
-                        expect(result).toNotExist()
+                        expect(result).toBeFalsy()
                         done()
                     }).catch((err) => {
                         done(err)
@@ -142,7 +142,7 @@ describe('DELETE /api/v1/todo:id', () => {
                 if (err) return done(err)
                 Todo.findById(hexId)
                     .then((result) => {
-                        expect(result).toExist()
+                        expect(result).toBeTruthy()
                         done()
                     }).catch((err) => {
                         done(err)
@@ -183,7 +183,7 @@ describe('PATCH /api/v1/todo:id', () => {
                 const body = res.body.data
                 expect(body.text).toBe(text)
                 expect(body.completed).toBe(true)
-                expect(body.completedAt).toBeA('number')
+                expect(body.completedAt).not.toBeNaN()
             })
             .end(done)
     })
@@ -215,7 +215,7 @@ describe('PATCH /api/v1/todo:id', () => {
                 const body = res.body.data
                 expect(body.text).toBe(text)
                 expect(body.completed).toBe(false)
-                expect(body.completedAt).toNotExist()
+                expect(body.completedAt).toBeFalsy()
             })
             .end(done)
     })
@@ -239,7 +239,7 @@ describe('Get /api/v1/user/info/:id', () => {
             .get(`/api/v1/user/info/${testUsers[0]._id.toHexString()}`)
             .expect(401)
             .expect(res => {
-                expect(res.body.data).toNotExist()
+                expect(res.body.data).toBeUndefined()
             })
             .end(done)
     })
@@ -250,7 +250,7 @@ describe('Get /api/v1/user/info/:id', () => {
             .set('x-auth', testUsers[0].tokens[0].token)
             .expect(400)
             .expect(res => {
-                expect(res.body.data).toNotExist({})
+                expect(res.body.data).toBeUndefined()
             })
             .end(done)
     })
@@ -280,16 +280,16 @@ describe('POST /api/v1/user/register', () => {
             })
             .expect(200)
             .expect(res => {
-                expect(res.headers['x-auth']).toExist()
-                expect(res.body.data._id).toExist()
+                expect(res.headers['x-auth']).toBeTruthy()
+                expect(res.body.data._id).toBeTruthy()
                 expect(res.body.data.email).toBe(email)
             })
             .end(err => {
                 if (err) return done(err)
                 User.findOne({ email })
                     .then(result => {
-                        expect(result).toExist()
-                        expect(result.password).toNotEqual(password)
+                        expect(result).toBeTruthy()
+                        expect(result.password).toEqual(expect.not.stringMatching(password));
                         done()
                     }).catch(err => {
                         done(err)
@@ -305,7 +305,7 @@ describe('POST /api/v1/user/register', () => {
             })
             .expect(400)
             .expect(res => {
-                expect(res.body.data).toNotExist()
+                expect(res.body.data).toBeFalsy()
             })
             .end(done)
     })
@@ -318,7 +318,7 @@ describe('POST /api/v1/user/register', () => {
             })
             .expect(400)
             .expect(res => {
-                expect(res.body.data).toNotExist()
+                expect(res.body.data).toBeFalsy()
             })
             .end(done)
     })
@@ -331,7 +331,7 @@ describe('POST /api/v1/user/register', () => {
             })
             .expect(400)
             .expect(res => {
-                expect(res.body.data).toNotExist()
+                expect(res.body.data).toBeFalsy()
             })
             .end(done)
     })
@@ -344,8 +344,8 @@ describe('POST /api/v1/user/login', () => {
             .send({...testUsers[1] })
             .expect(200)
             .expect(res => {
-                expect(res.headers['x-auth']).toExist()
-                expect(res.body.data._id).toExist()
+                expect(res.headers['x-auth']).toBeTruthy()
+                expect(res.body.data._id).toBeTruthy()
                 expect(res.body.data.email).toBe(testUsers[1].email)
             })
             .end((err, res) => {
@@ -354,8 +354,8 @@ describe('POST /api/v1/user/login', () => {
                 }
                 User.findById(testUsers[1]._id)
                     .then(user => {
-                        expect(user).toExist()
-                        expect(user.tokens[1]).toInclude({
+                        expect(user).toBeTruthy()
+                        expect(user.tokens[1]).toMatchObject({
                             access: 'auth',
                             token: res.headers['x-auth']
                         })
@@ -371,7 +371,7 @@ describe('POST /api/v1/user/login', () => {
             .send({ email: testUsers[1].email, password: 'password' })
             .expect(401)
             .expect(res => {
-                expect(res.body.data).toNotExist()
+                expect(res.body.data).toBeFalsy()
             })
             .end((err, res) => {
                 if (err) {
@@ -379,7 +379,7 @@ describe('POST /api/v1/user/login', () => {
                 }
                 User.findById(testUsers[1]._id)
                     .then(user => {
-                        expect(user).toExist()
+                        expect(user).toBeTruthy()
                         expect(user.tokens.length).toBe(1)
                         done()
                     }).catch(err => {
@@ -397,7 +397,7 @@ describe('DELETE /api/v1/user/logout', () => {
             .set('x-auth', testUsers[0].tokens[0].token)
             .expect(200)
             .expect(res => {
-                expect(res.body.data).toNotExist()
+                expect(res.body.data).toBeFalsy()
             })
             .end((err, res) => {
                 if (err) {
@@ -405,8 +405,8 @@ describe('DELETE /api/v1/user/logout', () => {
                 }
                 User.findById(testUsers[0]._id)
                     .then(user => {
-                        expect(user).toExist()
-                        expect(user.tokens).toExclude({
+                        expect(user).toBeTruthy()
+                        expect(user.tokens).not.toMatchObject({
                             access: 'auth',
                             token: res.headers['x-auth']
                         })
